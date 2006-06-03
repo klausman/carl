@@ -1,0 +1,18 @@
+Carl - Carl Analyzes RSync Logfiles
+-----------------------------------
+
+This is Carl. Carl analyzes rsync logfiles and creates a top ten
+list of users (or rather: IPs) both regarding volume and number of
+sessions. 
+
+Carl can be installed using the distutils method ("python setup.py install")
+or it can be run from its directory.
+
+Carl automatically uses Psyco if it is installed.
+
+The newest version is available here:
+http://www.schwarzvogel.de/software-misc.shtml
+
+I can be reached at klausman-carl@schwarzvogel.de
+
+Have fun.
