@@ -7,7 +7,7 @@ Intended to be used mainly by Gentoo Rsync Mirror admins
 import sys
 import time
 
-import Account
+import Accounts
 import Sessions
 
 __revision__ = "0.3"
@@ -52,8 +52,8 @@ def main():
         logfd = sys.stdin
         print "Reading from stdin"
 
-    ipc = Account.Account()
-    ipb = Account.Account()
+    ipc = Accounts.Accounts()
+    ipb = Accounts.Accounts()
     sessions = Sessions.Sessions()
 
     linecount = 0

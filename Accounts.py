@@ -4,7 +4,7 @@ Simple Accounting module
 
 __revision__ = "2"
 
-class Account:
+class Accounts:
     """
     Simple Accounting class
     """
