@@ -8,7 +8,7 @@ import sys
 import time
 
 import Account
-import IPSessions
+import Sessions
 
 __revision__ = "0.3"
 
@@ -54,7 +54,7 @@ def main():
 
     ipc = Account.Account()
     ipb = Account.Account()
-    sessions = IPSessions.IPSessions()
+    sessions = Sessions.Sessions()
 
     linecount = 0
     totaltraffic = 0L
