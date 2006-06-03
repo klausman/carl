@@ -46,8 +46,7 @@ class Account:
     def counts(self, desc=None):
         '''Returns list of keys, sorted by values.
         Feed a 1 if you want a descending sort.'''
-        i = map(lambda t: list(t), self.accounts.items())
-        map(lambda r: r.reverse(), i)
+        i = [[value, key] for key, value in self.accounts.items()]
         i.sort()
         if desc:
             i.reverse()
