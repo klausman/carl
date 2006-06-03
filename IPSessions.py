@@ -1,13 +1,20 @@
+"""Simple session tallying module"""
 
-class IPSessions:
+__revision__ = "1"
 
+class Sessions:
+    """Simple session tallying class"""
+    
     def __init__(self):
-        self.T={}
-        self.seencount=0
+        """Setup book keeping"""
+        self.accounts = {}
+        self.seencount = 0
 
-    def push(self,pid,ip):
-        self.seencount+=1
-        self.T[pid]=ip
+    def push(self, sid, info):
+        """Push session info into the list"""
+        self.seencount += 1
+        self.accounts[sid] = info
 
-    def pop(self,pid):
-        return self.T.get(pid)
+    def pop(self, sid):
+        """Return the session for a session id"""
+        return self.accounts.get(sid)
