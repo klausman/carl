@@ -2,7 +2,7 @@
 Simple Accounting module
 """
 
-__revision__ = "2"
+__revision__ = "1"
 
 class Accounts:
     """
