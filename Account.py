@@ -18,7 +18,7 @@ class Account:
         """Increment 'k' by 'num'"""
         try:
             self.accounts[k] = self.accounts[k]+num
-        except ValueError:
+        except KeyError:
             self.accounts[k] = 0L+num
             self.seencount += 1L
 
@@ -26,7 +26,7 @@ class Account:
         """Decrement 'k' by 'num'"""
         try:
             self.accounts[k] = self.accounts[k]-num
-        except ValueError:
+        except KeyError:
             self.accounts[k] = 0L+num
             self.seencount += 1L
 
@@ -34,7 +34,7 @@ class Account:
         """Return value of 'k'"""
         try:
             retval = self.accounts[k]
-        except ValueError:
+        except KeyError:
             retval = 0
 
         return retval
