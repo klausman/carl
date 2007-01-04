@@ -17,7 +17,7 @@ from optparse import OptionParser
 import Accounts
 import Sessions
 
-__revision__ = "0.4"
+__revision__ = "0.5"
 
 # This script was originally intended for Gentoo rsync
 # mirrors only. If you want, you can tune the rsync module
