@@ -3,13 +3,13 @@
 from distutils.core import setup
 
 setup(name='carl',
-      version='0.4',
+      version='0.5',
       license = "GNU GPL v2",
-      description='A simple rsync logfile analyzer',
+      description='An rsync logfile analyzer',
       author='Tobias Klausmann',
       author_email='klausman-carl@schwarzvogel.de',
       url='http://www.schwarzvogel.de/software-misc.shtml',
       py_modules=['Accounts', 'Sessions'],
       scripts=['Carl.py'],
-      data_files=[("share/doc/carl-0.4/",['COPYING', 'README'])]
+      data_files=[("share/doc/carl-0.5/",['COPYING', 'README'])]
      )
