@@ -17,7 +17,7 @@ from optparse import OptionParser
 import Accounts
 import Sessions
 
-__revision__ = "0.5"
+__revision__ = "0.6"
 
 # This script was originally intended for Gentoo rsync
 # mirrors only. If you want, you can tune the rsync module
@@ -78,6 +78,8 @@ def main():
     parser.add_option("-o", "--obfuscation", action="store", type="string",
                     dest="ostyle", default="none",
                     help="obfuscation style (simple, fancy, none) [%default]")
+    parser.add_option("-r", "--reverse", action="store_true", 
+                   dest="reverse", help="set reverse (classic) display order")
     (options, args) = parser.parse_args()
 
     print "Carl (Carl Analyzes Rsync Logfiles) %s" % __revision__
@@ -101,6 +103,7 @@ def main():
     ipc = Accounts.Accounts()
     ipb = Accounts.Accounts()
     sessions = Sessions.Sessions()
+    ip2hname = {}
 
     linecount = 0
     totaltraffic = 0L
@@ -127,8 +130,13 @@ def main():
                     hname, ipaddr = msg.split(" ", 6)[4:6]
                 except ValueError:
                     continue
-                ipc.incr('%s'%(ipaddr[1:-2]))
-                sessions.push(pid, '%s' % (ipaddr[1:-2]))
+                ipaddr = ipaddr[1:-2] # remove ()
+                # Do some hostname caching which can be used for 
+                # output later
+                if hname!="UNKNOWN" and not ip2hname.get(ipaddr):
+                    ip2hname[ipaddr] = hname
+                ipc.incr(ipaddr)
+                sessions.push(pid, '%s' % (ipaddr))
 
             elif msg.startswith("sent"):
                 try:
@@ -157,12 +165,17 @@ def main():
         print "Log seems to span %0.2f days." % (span)
         print
         print " Top 10 Hosts by byte count"
-        print "     bytes     ( Bytes )     IP-Address"
+        print "Rank bytes     ( Bytes )     IP-Address"
         print "-----------------------------------------"
-        for entry in ipb.counts()[-10:]:
+        top10list = ipb.counts()[-10:]
+        ranklist = range(1,11)
+        if not options.reverse:
+            top10list.reverse()
+            ranklist.reverse()
+        for entry in top10list:
             sbytes, pfxn = crunch(entry[0])
-            print "%12s (%9.2f%s) %15s" % \
-                (entry[0], sbytes, __SIPREFIXES__[pfxn], ob(entry[1], options.ostyle))
+            print "%2s %12s (%9.2f%s) %15s %s" % \
+                (ranklist.pop(), entry[0], sbytes, __SIPREFIXES__[pfxn], ob(entry[1], options.ostyle), ob(ip2hname.get(entry[1], ""), options.ostyle))
 
         print "-----------------------------------------"
         savg, pfxn = crunch(totaltraffic/span)
@@ -185,10 +198,15 @@ def main():
         print
 
         print " Top 10 Hosts by session count"
-        print "Sessions   per day    IP-Address"
+        print "Rank Sess.   per day    IP-Address"
         print "----------------------------------"
-        for entry in ipc.counts()[-10:]:
-            print "%6s    %6.2f   %15s"  % (entry[0], entry[0]/span, ob(entry[1], options.ostyle))
+        top10list = ipc.counts()[-10:]
+        ranklist = range(1,11)
+        if not options.reverse:
+            top10list.reverse()
+            ranklist.reverse()
+        for entry in top10list:
+            print "%2s %6s    %6.2f   %15s %s"  % (ranklist.pop(), entry[0], entry[0]/span, ob(entry[1], options.ostyle), ob(ip2hname.get(entry[1], ""), options.ostyle))
 
         print "----------------------------------"
         print "Average number of sessions per day: %0.2f" % \
