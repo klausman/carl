@@ -13,6 +13,7 @@ import time
 import md5
 
 from optparse import OptionParser
+from random import random
 
 import Accounts
 import Sessions
@@ -27,6 +28,12 @@ __MODULE__ = "gentoo-portage"
 
 # I pity the guy who has to add "E" (Exa) to the end of this list
 __SIPREFIXES__ = ["", "k", "M", "G", "T", "P"]
+
+# This value is inserted into the IP adresses if they're obfuscated
+# with MD5. This way, the same sum in the two top-ten lists means it's
+# the same IP, yet it makes the use of even a partial rainbow table 
+# unfeasible
+SALT="%s" % (random())
 
 try:
     import psyco
@@ -61,9 +68,9 @@ def ob(s, style):
     global var style is set to True.
     """
     if style == "fancy":
-        return md5.new(s).hexdigest()
+        return md5.new(s+SALT).hexdigest()
     elif style == "simple":
-        s=s[:s.rfind(".")]
+        s=s[:s.rfind(".") + 1]
         s=s[:s.rfind(".")]
         return "%s.x.x" %(s)
     else:
