@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2003-2007  Tobias Klausmann
+# Copyright (C) 2003-2009  Tobias Klausmann
 #
 """
 An rsync logfile analyzer.
@@ -18,7 +18,7 @@ from random import random
 import Accounts
 import Sessions
 
-__revision__ = "0.6"
+__revision__ = "0.8"
 
 # This script was originally intended for Gentoo rsync
 # mirrors only. If you want, you can tune the rsync module
