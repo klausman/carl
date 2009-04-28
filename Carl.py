@@ -68,7 +68,8 @@ def ob(s, style):
     global var style is set to True.
     """
     if s!="" and style == "fancy":
-        return md5.new(s+SALT).hexdigest()
+        dig=md5.new(s+SALT).hexdigest()
+        return ("%s...%s" % (dig[:8], dig[-8:]))
     elif s!="" and style == "simple":
         s=s[:s.rfind(".")]
         s=s[:s.rfind(".")]
