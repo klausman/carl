@@ -67,10 +67,10 @@ def ob(s, style):
     Return an obfuscated version of the string if the
     global var style is set to True.
     """
-    if style == "fancy":
+    if s!="" and style == "fancy":
         return md5.new(s+SALT).hexdigest()
-    elif style == "simple":
-        s=s[:s.rfind(".") + 1]
+    elif s!="" and style == "simple":
+        s=s[:s.rfind(".")]
         s=s[:s.rfind(".")]
         return "%s.x.x" %(s)
     else:
