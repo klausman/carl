@@ -10,7 +10,7 @@ Intended to be used mainly by Gentoo Rsync Mirror admins
 """
 import sys
 import time
-import md5
+import hashlib
 
 from optparse import OptionParser
 from random import random
@@ -68,7 +68,9 @@ def ob(s, style):
     global var style is set to True.
     """
     if s!="" and style == "fancy":
-        dig=md5.new(s+SALT).hexdigest()
+        m = hashlib.md5()
+        m.update(s+SALT)
+        dig=m.hexdigest()
         return ("%s...%s" % (dig[:8], dig[-8:]))
     elif s!="" and style == "simple":
         s=s[:s.rfind(".")]
