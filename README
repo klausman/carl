@@ -10,6 +10,9 @@ or it can be run from its directory.
 
 Carl automatically uses Psyco if it is installed.
 
+Note that from version 0.9 onward, Carl supports Python 3 while still being
+compatible with Python version 2.6 and later.
+
 The newest version is available here:
 http://www.schwarzvogel.de/software-misc.shtml
 
