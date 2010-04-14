@@ -62,7 +62,8 @@ def ob(s, style):
     """
     if s!="" and style == "fancy":
         m = hashlib.md5()
-        m.update(s+SALT)
+        s+=SALT
+        m.update(s.encode("utf8"))
         dig=m.hexdigest()
         return ("%s...%s" % (dig[:8], dig[-8:]))
     elif s!="" and style == "simple":
