@@ -1,6 +1,6 @@
 """Simple session tallying module"""
 
-__revision__ = "1"
+__revision__ = "2"
 
 class Sessions:
     """Simple session tallying class"""

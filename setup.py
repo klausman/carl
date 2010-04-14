@@ -11,5 +11,5 @@ setup(name='carl',
       url='http://www.schwarzvogel.de/software-misc.shtml',
       py_modules=['Accounts', 'Sessions'],
       scripts=['Carl.py'],
-      data_files=[("share/doc/carl-0.8/",['COPYING', 'README'])]
+      data_files=[("share/doc/carl-%s/" % (version), ['COPYING', 'README'])]
      )

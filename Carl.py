@@ -18,7 +18,7 @@ from random import random
 import Accounts
 import Sessions
 
-__revision__ = "0.8"
+__revision__ = "0.9"
 
 # This script was originally intended for Gentoo rsync
 # mirrors only. If you want, you can tune the rsync module
