@@ -46,8 +46,8 @@ def usage():
     """
     Print out short usage info.
     """
-    print """Usage: %s [logfile]
-       If logfile is not specified, it's read from stdin.""" % sys.argv[0]
+    print("""Usage: %s [logfile]
+       If logfile is not specified, it's read from stdin.""" % sys.argv[0])
 
 def crunch(number, div=1024):
     """
@@ -95,25 +95,25 @@ def main():
     (options, args) = parser.parse_args()
 
     if not options.shortoutput:
-        print "Carl (Carl Analyzes Rsync Logfiles) %s" % __revision__
-        print "(C) Tobias Klausmann"
+        print("Carl (Carl Analyzes Rsync Logfiles) %s" % __revision__)
+        print("(C) Tobias Klausmann")
         if __psyco_enabled__:
-            print "Psyco found and enabled."
+            print("Psyco found and enabled.")
 
     if len(args) > 0:
         fname = args[0]
         try:
             logfd = open(fname, "r")
-        except IOError, eobj:
+        except IOError as eobj:
             sys.stderr.write("Cannot open '%s' for reading: %s" % (fname, eobj.strerror))
             sys.exit(1)
         if not options.shortoutput:
-            print "Reading from '%s'" %(fname)
+            print("Reading from '%s'" %(fname))
 
     else:
         logfd = sys.stdin
         if not options.shortoutput:
-            print "Reading from stdin"
+            print("Reading from stdin")
 
     ipc = Accounts.Accounts()
     ipb = Accounts.Accounts()
@@ -121,7 +121,7 @@ def main():
     ip2hname = {}
 
     linecount = 0
-    totaltraffic = 0L
+    totaltraffic = 0
 
     sys.stdout.flush()
 
@@ -162,7 +162,7 @@ def main():
                     continue
                 ipaddr = sessions.pop(pid)
                 ipb.incr(ipaddr, int(wbytes)+int(rbytes))
-                totaltraffic += long(rbytes)+long(wbytes)
+                totaltraffic += int(rbytes)+int(wbytes)
 
         ldate, ltime = line.split(None, 2)[0:2]
         span = (time.mktime(time.strptime("%s %s" % (ldate, ltime), \
@@ -175,73 +175,72 @@ def main():
         #
         if not options.shortoutput:
             tt, pfxn = crunch(totaltraffic)
-            print "Total traffic: %.2f %sBytes" % (tt, __SIPREFIXES__[pfxn])
-            print "Total number of sessions:", sessions.seencount
-            print "Total number of unique IPs:", ipb.seencount
-            print "Log seems to span %0.2f days." % (span)
-            print
-        print " Top 10 Hosts by byte count"
-        print "Rank bytes     ( Bytes )     IP-Address"
-        print "-----------------------------------------"
+            print("Total traffic: %.2f %sBytes" % (tt, __SIPREFIXES__[pfxn]))
+            print("Total number of sessions:", sessions.seencount)
+            print("Total number of unique IPs:", ipb.seencount)
+            print("Log seems to span %0.2f days." % (span))
+            print()
+        print(" Top 10 Hosts by byte count")
+        print("Rank bytes     ( Bytes )     IP-Address")
+        print("-----------------------------------------")
         top10list = ipb.counts()[-10:]
-        ranklist = range(1,11)
+        ranklist = list(range(1,11))
         if not options.reverse:
             top10list.reverse()
             ranklist.reverse()
         for entry in top10list:
             sbytes, pfxn = crunch(entry[0])
-            print "%2s %12s (%9.2f%s) %15s %s" % \
-                (ranklist.pop(), entry[0], sbytes, __SIPREFIXES__[pfxn], ob(entry[1], options.ostyle), ob(ip2hname.get(entry[1], ""), options.ostyle))
+            print("%2s %12s (%9.2f%s) %15s %s" % \
+                (ranklist.pop(), entry[0], sbytes, __SIPREFIXES__[pfxn], ob(entry[1], options.ostyle), ob(ip2hname.get(entry[1], ""), options.ostyle)))
 
-        print "-----------------------------------------"
+        print("-----------------------------------------")
         if not options.shortoutput:
             savg, pfxn = crunch(totaltraffic/span)
-            print "Average traffic per day: %0.2f bytes (%0.2f%sB)"% \
-                (totaltraffic/span, savg, __SIPREFIXES__[pfxn])
+            print("Average traffic per day: %0.2f bytes (%0.2f%sB)"% \
+                (totaltraffic/span, savg, __SIPREFIXES__[pfxn]))
 
-            ttop5num = long(ipb.seencount*0.05)
-            ttop5traffic = 0L
+            ttop5num = int(ipb.seencount*0.05)
+            ttop5traffic = 0
             for entry in ipb.counts()[-ttop5num:]:
                 ttop5traffic += entry[0]
             
             stop, pfxn = crunch(ttop5traffic)
-            print \
-             "Top 5%% of IPs (%s) account for %s bytes (%0.2f%sB) of traffic," % \
-             (ttop5num,ttop5traffic,stop,__SIPREFIXES__[pfxn])
-            print "which is %0.2f%% of the total traffic."% \
-             (ttop5traffic/(totaltraffic/100.0))
+            print("Top 5%% of IPs (%s) account for %s bytes (%0.2f%sB) of traffic," % \
+             (ttop5num,ttop5traffic,stop,__SIPREFIXES__[pfxn]))
+            print("which is %0.2f%% of the total traffic."% \
+             (ttop5traffic/(totaltraffic/100.0)))
 
            
-        print
+        print()
 
-        print " Top 10 Hosts by session count"
-        print "Rank Sess.   per day    IP-Address"
-        print "----------------------------------"
+        print(" Top 10 Hosts by session count")
+        print("Rank Sess.   per day    IP-Address")
+        print("----------------------------------")
         top10list = ipc.counts()[-10:]
-        ranklist = range(1,11)
+        ranklist = list(range(1,11))
         if not options.reverse:
             top10list.reverse()
             ranklist.reverse()
         for entry in top10list:
-            print "%2s %6s    %6.2f   %15s %s"  % (ranklist.pop(), entry[0], entry[0]/span, ob(entry[1], options.ostyle), ob(ip2hname.get(entry[1], ""), options.ostyle))
+            print("%2s %6s    %6.2f   %15s %s"  % (ranklist.pop(), entry[0], entry[0]/span, ob(entry[1], options.ostyle), ob(ip2hname.get(entry[1], ""), options.ostyle)))
 
-        print "----------------------------------"
+        print("----------------------------------")
         if not options.shortoutput:
-            print "Average number of sessions per day: %0.2f" % \
-                (sessions.seencount/span)
+            print("Average number of sessions per day: %0.2f" % \
+                (sessions.seencount/span))
 
-            stop5num = long(ipc.seencount*0.05)
-            stop5sessions = 0L
+            stop5num = int(ipc.seencount*0.05)
+            stop5sessions = 0
             for entry in ipc.counts()[-stop5num:]:
                 stop5sessions += entry[0]
-            print "Top 5%% of IPs (%s) account for %s sessions." % \
-             (stop5num,stop5sessions)
-            print "which is %0.2f%% of the total number of sessions." % \
-             (stop5sessions/(sessions.seencount/100.0))
-            print 
+            print("Top 5%% of IPs (%s) account for %s sessions." % \
+             (stop5num,stop5sessions))
+            print("which is %0.2f%% of the total number of sessions." % \
+             (stop5sessions/(sessions.seencount/100.0)))
+            print() 
 
-            print "Analyzed %s lines in %0.2f seconds, %0.2f lines per second" % \
-             (linecount,rtime,linecount/rtime)
+            print("Analyzed %s lines in %0.2f seconds, %0.2f lines per second" % \
+             (linecount,rtime,linecount/rtime))
     except KeyboardInterrupt:
         sys.stderr.write("Interrupted. Probably your fault.\n")
         sys.exit(1)

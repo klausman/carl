@@ -12,23 +12,23 @@ class Accounts:
     def __init__(self):
         """Initialize book keeping"""
         self.accounts = {}
-        self.seencount = 0L
+        self.seencount = 0
 
     def incr(self, k, num = 1):
         """Increment 'k' by 'num'"""
         try:
             self.accounts[k] = self.accounts[k]+num
         except KeyError:
-            self.accounts[k] = 0L+num
-            self.seencount += 1L
+            self.accounts[k] = 0+num
+            self.seencount += 1
 
     def decr(self, k, num = 1):
         """Decrement 'k' by 'num'"""
         try:
             self.accounts[k] = self.accounts[k]-num
         except KeyError:
-            self.accounts[k] = 0L+num
-            self.seencount += 1L
+            self.accounts[k] = 0+num
+            self.seencount += 1
 
     def val(self, k):
         """Return value of 'k'"""
@@ -41,12 +41,12 @@ class Accounts:
 
     def getkeys(self):
         """Return all keys"""
-        return self.accounts.keys()
+        return list(self.accounts.keys())
 
     def counts(self, desc=None):
         '''Returns list of keys, sorted by values.
         Feed a 1 if you want a descending sort.'''
-        i = [[value, key] for key, value in self.accounts.items()]
+        i = [[value, key] for key, value in list(self.accounts.items())]
         i.sort()
         if desc:
             i.reverse()
