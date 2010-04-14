@@ -42,13 +42,6 @@ try:
 except ImportError:
     __psyco_enabled__ = False
 
-def usage():
-    """
-    Print out short usage info.
-    """
-    print("""Usage: %s [logfile]
-       If logfile is not specified, it's read from stdin.""" % sys.argv[0])
-
 def crunch(number, div=1024):
     """
     Repeatedly divides a number by div until it is smaller than div 
@@ -84,7 +77,9 @@ def main():
     Main program.
     """
     usage = "usage: %prog [options] [filename]\n\nIf filename is not specified, read from stdin"
-    parser = OptionParser(usage=usage, version="%%prog %s" % __revision__)
+    lic="Licensed under the GPL v2 (see COPYING). No warranty whatsoever."
+    parser = OptionParser(usage=usage, version="%%prog %s\n%s" \
+        % (__revision__, lic))
     parser.add_option("-o", "--obfuscation", action="store", type="string",
                     dest="ostyle", default="none",
                     help="obfuscation style (simple, fancy, none) [%default]")
