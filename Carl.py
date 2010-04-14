@@ -57,8 +57,8 @@ def crunch(number, div=1024):
 
 def ob(s, style):
     """
-    Return an obfuscated version of the string if the
-    global var style is set to True.
+    Return an obfuscated version of the string in the style specified
+    (one of fancy, simple or everything else (being no obfuscation)).
     """
     if s!="" and style == "fancy":
         m = hashlib.md5()
