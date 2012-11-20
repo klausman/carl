@@ -27,7 +27,7 @@ class Accounts:
         try:
             self.accounts[k] = self.accounts[k]-num
         except KeyError:
-            self.accounts[k] = 0+num
+            self.accounts[k] = 0-num
             self.seencount += 1
 
     def val(self, k):
@@ -46,7 +46,7 @@ class Accounts:
     def counts(self, desc=None):
         '''Returns list of keys, sorted by values.
         Feed a 1 if you want a descending sort.'''
-        i = [[value, key] for key, value in list(self.accounts.items())]
+        i = [(value, key) for key, value in list(self.accounts.items())]
         i.sort()
         if desc:
             i.reverse()
