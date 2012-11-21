@@ -83,10 +83,12 @@ def ob(data, style):
 
     return result
 
-def main():
+def parse_cmdline(argv):
     """
-    Main program.
+    Parse commandline stored in argv
     """
+    msgs = []
+    errmsgs = []
     usage = "usage: %prog [options] [filename]\n\nIf filename is not specified, read from stdin"
     lic="Licensed under the GPL v2 (see COPYING). No warranty whatsoever."
     parser = OptionParser(usage=usage, version="%%prog %s\n%s" \
@@ -96,30 +98,35 @@ def main():
                     help="obfuscation style (simple, fancy, none) [%default]")
     parser.add_option("-r", "--reverse", action="store_true",
                    dest="reverse", help="set reverse (classic) display order")
-    parser.add_option("-s", "--short", action="store_true",
+    parser.add_option("-s", "--short", action="store_true", default=False,
                    dest="shortoutput", help="display only the two top-10 lists")
-    (options, args) = parser.parse_args()
+    (options, args) = parser.parse_args(argv)
 
     if not options.shortoutput:
-        print("Carl (Carl Analyzes Rsync Logfiles) %s" % __version__)
-        print("(C) Tobias Klausmann")
+        msgs.append("Carl (Carl Analyzes Rsync Logfiles) %s" % __version__)
+        msgs.append("(C) Tobias Klausmann")
         if __psyco_enabled__:
-            print("Psyco found and enabled.")
+            msgs.append("Psyco found and enabled.")
 
-    if len(args) > 0:
-        fname = args[0]
-        try:
-            logfd = open(fname, "r")
-        except IOError as eobj:
-            sys.stderr.write("Cannot open '%s' for reading: %s" % (fname, eobj.strerror))
-            sys.exit(1)
-        if not options.shortoutput:
-            print("Reading from '%s'" %(fname))
-
+    if len(args) > 1:
+        fnames = args[1:]
     else:
-        logfd = sys.stdin
+        fnames = []
         if not options.shortoutput:
-            print("Reading from stdin")
+            msgs.append("Reading from stdin")
+
+    return (options, args, fnames, msgs, errmsgs)
+
+def main():
+    """
+    Main program.
+    """
+
+    (options, args, fnames, msgs, errmsgs) = parse_cmdline(sys.argv)
+    if msgs:
+        print("\n".join(msgs))
+    if errmsgs:
+        sys.stderr.write("\n".join(errmsgs))
 
     ipc = Accounts.Accounts()
     ipb = Accounts.Accounts()
@@ -133,8 +140,9 @@ def main():
 
     rtime = time.time()
     line = ""
+
     try:
-        for line in logfd:
+        for line in open(fnames[0]):
             linecount += 1
             if linecount == 1:
                 # timefmt: 2004/02/23 23:11:27
@@ -175,17 +183,15 @@ def main():
             "%Y/%m/%d %H:%M:%S"))-start) / (24*3600)
         rtime = time.time()-rtime
 
-        del (logfd)
-
         # Now, generate the report.
         #
         if not options.shortoutput:
             tt, pfxn = crunch(totaltraffic)
             print("Total traffic: %.2f %sBytes" % (tt, __SIPREFIXES__[pfxn]))
-            print("Total number of sessions:", sessions.seencount)
-            print("Total number of unique IPs:", ipb.seencount)
+            print("Total number of sessions: %s"% sessions.seencount)
+            print("Total number of unique IPs: %s"% ipb.seencount)
             print("Log seems to span %0.2f days." % (span))
-            print()
+            print("")
         print(" Top 10 Hosts by byte count")
         print("Rank bytes     ( Bytes )     IP-Address")
         print("-----------------------------------------")
@@ -217,7 +223,7 @@ def main():
              (ttop5traffic/(totaltraffic/100.0)))
 
 
-        print()
+        print("")
 
         print(" Top 10 Hosts by session count")
         print("Rank Sess.   per day    IP-Address")
@@ -243,7 +249,7 @@ def main():
              (stop5num,stop5sessions))
             print("which is %0.2f%% of the total number of sessions." % \
              (stop5sessions/(sessions.seencount/100.0)))
-            print()
+            print("")
 
             print("Analyzed %s lines in %0.2f seconds, %0.2f lines per second" % \
              (linecount,rtime,linecount/rtime))
