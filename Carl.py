@@ -18,7 +18,7 @@ from random import random
 import Accounts
 import Sessions
 
-__revision__ = "0.9"
+__version__ = "0.9"
 
 # This script was originally intended for Gentoo rsync
 # mirrors only. If you want, you can tune the rsync module
@@ -80,7 +80,7 @@ def main():
     usage = "usage: %prog [options] [filename]\n\nIf filename is not specified, read from stdin"
     lic="Licensed under the GPL v2 (see COPYING). No warranty whatsoever."
     parser = OptionParser(usage=usage, version="%%prog %s\n%s" \
-        % (__revision__, lic))
+        % (__version__, lic))
     parser.add_option("-o", "--obfuscation", action="store", type="string",
                     dest="ostyle", default="none",
                     help="obfuscation style (simple, fancy, none) [%default]")
@@ -91,7 +91,7 @@ def main():
     (options, args) = parser.parse_args()
 
     if not options.shortoutput:
-        print("Carl (Carl Analyzes Rsync Logfiles) %s" % __revision__)
+        print("Carl (Carl Analyzes Rsync Logfiles) %s" % __version__)
         print("(C) Tobias Klausmann")
         if __psyco_enabled__:
             print("Psyco found and enabled.")
