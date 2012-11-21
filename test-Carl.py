@@ -45,7 +45,6 @@ class SessionsTest(unittest.TestCase):
             self.assertAlmostEqual(res, out[0])
             self.assertEqual(mag, out[1])
 
-    # TODO: IPv6
     def testObFancy(self):
         golden = [("eenie", "b7259125...fd872fa5"),
                   ("meenie", "9d9b3703...5ae754db"),
@@ -92,6 +91,7 @@ class SessionsTest(unittest.TestCase):
         argv = ["carl", "-o", "fancy", "-r"]
         (options, args, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
         self.assertEqual(args, ["carl"])
+        self.assertEqual(fnames, [])
         self.assertEqual(options.shortoutput, False)
         self.assertEqual(options.ostyle, "fancy")
         self.assertEqual(options.reverse, True)
@@ -103,6 +103,7 @@ class SessionsTest(unittest.TestCase):
         (options, args, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
         self.assertGreater(len(args), 1)
         self.assertEqual(args, ["carl", "foo", "bar", "baz"])
+        self.assertEqual(fnames, ["foo", "bar", "baz"])
         self.assertEqual(options.shortoutput, False)
         self.assertEqual(options.ostyle, "fancy")
         self.assertEqual(options.reverse, True)
