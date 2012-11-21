@@ -110,6 +110,7 @@ def parse_cmdline(argv):
 
     if len(args) > 1:
         fnames = args[1:]
+        msgs.append("Reading from %s"% ", ".join(fnames))
     else:
         fnames = []
         if not options.shortoutput:
@@ -154,6 +155,8 @@ def main():
 
     for fname in fnames:
         inputdata += getfilecontent(fname)
+    if len(fnames) ==0:
+        inputdata = sys.stdin.read()
 
     try:
         for line in inputdata.split("\n"):
