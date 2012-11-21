@@ -10,7 +10,7 @@ class SessionsTest(unittest.TestCase):
     def setUp(self):
         self.savedsalt = Carl.SALT
         Carl.SALT="lemon curry"
-    
+
     def tearDown(self):
         Carl.SALT = self.savedsalt
 
@@ -29,7 +29,7 @@ class SessionsTest(unittest.TestCase):
             (res, mag) = Carl.crunch(inp)
             self.assertAlmostEqual(res, out[0])
             self.assertEqual(mag, out[1])
-                
+
     def testCrunchSIDev(self):
         golden = [(1, (1, 0)),
                   (1000, (1, 1)),
@@ -54,7 +54,7 @@ class SessionsTest(unittest.TestCase):
                  ]
         for (inp, out) in golden:
             self.assertEqual(out, Carl.ob(inp, "fancy"))
-    
+
     def testObSimple(self):
         golden = [("127.0.0.1", "127.0..."),
                   ("192.168.65.3", "192.168..."),
@@ -66,7 +66,7 @@ class SessionsTest(unittest.TestCase):
                  ]
         for (inp, out) in golden:
             self.assertEqual(out, Carl.ob(inp, "simple"))
-    
+
     def testObNone(self):
         golden = ["127.0.0.1",
                   "192.168.65.3",
@@ -76,5 +76,38 @@ class SessionsTest(unittest.TestCase):
                  ]
         for inp in golden:
             self.assertEqual(inp, Carl.ob(inp, ""))
-    
+
+
+    def testParseCmdline(self):
+        argv = ["carl", "-o", "fancy", "-r", "-s"]
+        (options, args, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
+        self.assertEqual(args, ["carl"])
+        self.assertEqual(options.shortoutput, True)
+        self.assertEqual(options.ostyle, "fancy")
+        self.assertEqual(options.reverse, True)
+        self.assertEqual(msgs, [])
+        self.assertEqual(errmsgs, [])
+
+    def testParseCmdlineVerbose(self):
+        argv = ["carl", "-o", "fancy", "-r"]
+        (options, args, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
+        self.assertEqual(args, ["carl"])
+        self.assertEqual(options.shortoutput, False)
+        self.assertEqual(options.ostyle, "fancy")
+        self.assertEqual(options.reverse, True)
+        self.assertNotEqual(msgs, [])
+        self.assertEqual(errmsgs, [])
+
+    def testParseCmdlineVerboseWithArgs(self):
+        argv = ["carl", "-o", "fancy", "-r", "foo", "bar", "baz"]
+        (options, args, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
+        self.assertGreater(len(args), 1)
+        self.assertEqual(args, ["carl", "foo", "bar", "baz"])
+        self.assertEqual(options.shortoutput, False)
+        self.assertEqual(options.ostyle, "fancy")
+        self.assertEqual(options.reverse, True)
+        self.assertNotEqual(msgs, [])
+        self.assertNotEqual(fnames, [])
+        self.assertEqual(errmsgs, [])
+
 
