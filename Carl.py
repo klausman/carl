@@ -31,7 +31,7 @@ __SIPREFIXES__ = ["", "k", "M", "G", "T", "P"]
 
 # This value is inserted into the IP adresses if they're obfuscated
 # with MD5. This way, the same sum in the two top-ten lists means it's
-# the same IP, yet it makes the use of even a partial rainbow table 
+# the same IP, yet it makes the use of even a partial rainbow table
 # unfeasible
 SALT="%s" % (random())
 
@@ -44,34 +44,44 @@ except ImportError:
 
 def crunch(number, div=1024):
     """
-    Repeatedly divides a number by div until it is smaller than div 
+    Repeatedly divides a number by div until it is smaller than div
     """
     # Make sure it's a float
     div *= 1.0
     passes = 0
-    while number > div:
+    while number >= div:
         number /= div
         passes += 1
     return (number, passes)
 
 
-def ob(s, style):
+def ob(data, style):
     """
     Return an obfuscated version of the string in the style specified
     (one of fancy, simple or everything else (being no obfuscation)).
     """
-    if s!="" and style == "fancy":
+    if data!="" and style == "fancy":
+        # This branch doesn't care about v4 vs v6
         m = hashlib.md5()
-        s+=SALT
-        m.update(s.encode("utf8"))
+        data+=SALT
+        m.update(data.encode("utf8"))
         dig=m.hexdigest()
-        return ("%s...%s" % (dig[:8], dig[-8:]))
-    elif s!="" and style == "simple":
-        s=s[:s.rfind(".")]
-        s=s[:s.rfind(".")]
-        return "%s.x.x" %(s)
-    else:
-        return s
+        result = "%s...%s" % (dig[:8], dig[-8:])
+    elif data!="" and style == "simple":
+        if ":" in data:  # IPv6
+            if data != "::1":
+                sep = ":"
+            else:
+                return data # keep v6's localhost shorthand intact
+        else:  # IPv4 and hostnames
+            sep = "."
+
+        result = sep.join(data.split(sep)[:2])+"..."
+
+    else: # No obfuscation
+        result = data
+
+    return result
 
 def main():
     """
@@ -84,9 +94,9 @@ def main():
     parser.add_option("-o", "--obfuscation", action="store", type="string",
                     dest="ostyle", default="none",
                     help="obfuscation style (simple, fancy, none) [%default]")
-    parser.add_option("-r", "--reverse", action="store_true", 
+    parser.add_option("-r", "--reverse", action="store_true",
                    dest="reverse", help="set reverse (classic) display order")
-    parser.add_option("-s", "--short", action="store_true", 
+    parser.add_option("-s", "--short", action="store_true",
                    dest="shortoutput", help="display only the two top-10 lists")
     (options, args) = parser.parse_args()
 
@@ -127,11 +137,11 @@ def main():
         for line in logfd:
             linecount += 1
             if linecount == 1:
-                # timefmt: 2004/02/23 23:11:27 
+                # timefmt: 2004/02/23 23:11:27
                 ldate, ltime = line.split(None, 2)[0:2]
                 start = time.mktime(time.strptime("%s %s"%(ldate, ltime), \
                     "%Y/%m/%d %H:%M:%S"))
-                
+
 
             pid, msg = line[20:].split(" ", 1)
             if msg.startswith("rsync on %s" % (__MODULE__) ) and \
@@ -142,7 +152,7 @@ def main():
                 except ValueError:
                     continue
                 ipaddr = ipaddr[1:-2] # remove ()
-                # Do some hostname caching which can be used for 
+                # Do some hostname caching which can be used for
                 # output later
                 if hname!="UNKNOWN" and not ip2hname.get(ipaddr):
                     ip2hname[ipaddr] = hname
@@ -199,14 +209,14 @@ def main():
             ttop5traffic = 0
             for entry in ipb.counts()[-ttop5num:]:
                 ttop5traffic += entry[0]
-            
+
             stop, pfxn = crunch(ttop5traffic)
             print("Top 5%% of IPs (%s) account for %s bytes (%0.2f%sB) of traffic," % \
              (ttop5num,ttop5traffic,stop,__SIPREFIXES__[pfxn]))
             print("which is %0.2f%% of the total traffic."% \
              (ttop5traffic/(totaltraffic/100.0)))
 
-           
+
         print()
 
         print(" Top 10 Hosts by session count")
@@ -233,7 +243,7 @@ def main():
              (stop5num,stop5sessions))
             print("which is %0.2f%% of the total number of sessions." % \
              (stop5sessions/(sessions.seencount/100.0)))
-            print() 
+            print()
 
             print("Analyzed %s lines in %0.2f seconds, %0.2f lines per second" % \
              (linecount,rtime,linecount/rtime))

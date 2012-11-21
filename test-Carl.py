@@ -16,7 +16,9 @@ class SessionsTest(unittest.TestCase):
 
     def testCrunchDefDiv(self):
         golden = [(1, (1, 0)),
-                  (1024, (1024, 0)),
+                  (512, (512, 0)),
+                  (1024, (1, 1)),
+                  (1025, (1.0009765625, 1)),
                   (4096, (4, 1)),
                   (8192, (8, 1)),
                   (10240, (10, 1)),
@@ -30,7 +32,8 @@ class SessionsTest(unittest.TestCase):
                 
     def testCrunchSIDev(self):
         golden = [(1, (1, 0)),
-                  (1000, (1000, 0)),
+                  (1000, (1, 1)),
+                  (1001, (1.001, 1)),
                   (4000, (4, 1)),
                   (8000, (8, 1)),
                   (10000, (10, 1)),
@@ -53,21 +56,25 @@ class SessionsTest(unittest.TestCase):
             self.assertEqual(out, Carl.ob(inp, "fancy"))
     
     def testObSimple(self):
-        golden = [("127.0.0.1", "127.0.x.x"),
-                  ("192.168.65.3", "192.168.x.x"),
-                  ("172.19.22.4", "172.19.x.x"),
-                  ("10.4.2.65", "10.4.x.x"),
+        golden = [("127.0.0.1", "127.0..."),
+                  ("192.168.65.3", "192.168..."),
+                  ("172.19.22.4", "172.19..."),
+                  ("10.4.2.65", "10.4..."),
+                  ("2001::a:b:c:d", "2001:..."),
+                  ("2001:db8:a:b:c::", "2001:db8..."),
+                  ("::1", "::1"),
                  ]
         for (inp, out) in golden:
             self.assertEqual(out, Carl.ob(inp, "simple"))
     
     def testObNone(self):
-        golden = [("127.0.0.1", "127.0.x.x"),
-                  ("192.168.65.3", "192.168.x.x"),
-                  ("172.19.22.4", "172.19.x.x"),
-                  ("10.4.2.65", "10.4.x.x"),
+        golden = ["127.0.0.1",
+                  "192.168.65.3",
+                  "172.19.22.4",
+                  "2001::a:b:c:d",
+                  "2001:db8:a:b:c::",
                  ]
-        for (inp, out) in golden:
+        for inp in golden:
             self.assertEqual(inp, Carl.ob(inp, ""))
     
 
