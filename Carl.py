@@ -117,6 +117,16 @@ def parse_cmdline(argv):
 
     return (options, args, fnames, msgs, errmsgs)
 
+def getfilecontent(fname):
+    data = ""
+    try:
+        fd = open(fname)
+        data += fd.read()
+    except IOerror as e:
+        sys.stderr.write("Could not read '%s': %s\n" % (fname, e))
+    return data
+
+
 def main():
     """
     Main program.
@@ -140,18 +150,28 @@ def main():
 
     rtime = time.time()
     line = ""
+    inputdata = ""
+
+    for fname in fnames:
+        inputdata += getfilecontent(fname)
 
     try:
-        for line in open(fnames[0]):
+        for line in inputdata.split("\n"):
+            if not line:
+                continue
             linecount += 1
+            try:
+                ldate, ltime = line.split(None, 2)[0:2]
+            except ValueError:
+                continue
             if linecount == 1:
                 # timefmt: 2004/02/23 23:11:27
-                ldate, ltime = line.split(None, 2)[0:2]
                 start = time.mktime(time.strptime("%s %s"%(ldate, ltime), \
                     "%Y/%m/%d %H:%M:%S"))
 
-
             pid, msg = line[20:].split(" ", 1)
+            if msg.startswith("rsync error: "):
+                continue
             if msg.startswith("rsync on %s" % (__MODULE__) ) and \
                 not msg.startswith("rsync on %s/metadata" % (__MODULE__)) and \
                 not msg.startswith("rsync on %s//metadata" % (__MODULE__)):
@@ -178,7 +198,6 @@ def main():
                 ipb.incr(ipaddr, int(wbytes)+int(rbytes))
                 totaltraffic += int(rbytes)+int(wbytes)
 
-        ldate, ltime = line.split(None, 2)[0:2]
         span = (time.mktime(time.strptime("%s %s" % (ldate, ltime), \
             "%Y/%m/%d %H:%M:%S"))-start) / (24*3600)
         rtime = time.time()-rtime
