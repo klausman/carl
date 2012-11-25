@@ -1,12 +1,17 @@
 #!/usr/bin/python -tt
-
+"""Test suite for Accounts.py of Carl"""
 import unittest
 import Accounts
+
+# Pylint has a counterproductive idea of proper names in this case. Also,
+# docstrings for tests seem a bit overblown. TODO: find someone who cares 
+# enough to write them.
+# pylint: disable=invalid-name,missing-docstring,too-many-public-methods,
 
 class AccountsTest(unittest.TestCase):
     """Test Accounts class"""
 
-    def setUp(self):
+    def setUp(self): 
         self.keynames = ["mykey", "yourkey", "theirkey", "hiskey"]
         self.splitpoint = int(len(self.keynames)/2)
 
@@ -100,15 +105,16 @@ class AccountsTest(unittest.TestCase):
         for key in self.keynames: 
             myac.incr(key, 42)
         self.assertEqual(myac.seencount, len(self.keynames))
-        # since all the counts are the same now, we can not rely on order
-        self.assertEqual(set(myac.counts()), set([(42, x) for x in self.keynames]))
+        # since all the counts are the same now, we needn't care about order
+        self.assertEqual(set(myac.counts()), 
+                         set([(42, x) for x in self.keynames]))
         myac = Accounts.Accounts()
         self.assertEqual(myac.accounts, {})
         self.assertEqual(myac.seencount, 0)
         self.assertEqual(myac.counts(), [])
-        incr=0
+        incr = 0
         for key in self.keynames: 
-            incr+=1
+            incr += 1
             myac.incr(key, incr)
         # Now we can assume order.
         self.assertEqual(myac.counts(), 

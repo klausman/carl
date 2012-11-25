@@ -1,15 +1,19 @@
 #!/usr/bin/python -tt
-
-import sys
+"""Test suite for Carl.py from Carl"""
 import unittest
 import Carl
+
+# Pylint has a counterproductive idea of proper names in this case. Also,
+# docstrings for tests seem a bit overblown. TODO: find someone who cares 
+# enough to write them.
+# pylint: disable=invalid-name,missing-docstring,too-many-public-methods
 
 class SessionsTest(unittest.TestCase):
     """Test Sessions class"""
 
     def setUp(self):
         self.savedsalt = Carl.SALT
-        Carl.SALT="lemon curry"
+        Carl.SALT = "lemon curry"
 
     def tearDown(self):
         Carl.SALT = self.savedsalt
@@ -52,7 +56,7 @@ class SessionsTest(unittest.TestCase):
                   ("moe", "1b9fd716...9196f82f"),
                  ]
         for (inp, out) in golden:
-            self.assertEqual(out, Carl.ob(inp, "fancy"))
+            self.assertEqual(out, Carl.obfuscate(inp, "fancy"))
 
     def testObSimple(self):
         golden = [("127.0.0.1", "127.0..."),
@@ -64,7 +68,7 @@ class SessionsTest(unittest.TestCase):
                   ("::1", "::1"),
                  ]
         for (inp, out) in golden:
-            self.assertEqual(out, Carl.ob(inp, "simple"))
+            self.assertEqual(out, Carl.obfuscate(inp, "simple"))
 
     def testObNone(self):
         golden = ["127.0.0.1",
@@ -74,23 +78,22 @@ class SessionsTest(unittest.TestCase):
                   "2001:db8:a:b:c::",
                  ]
         for inp in golden:
-            self.assertEqual(inp, Carl.ob(inp, ""))
+            self.assertEqual(inp, Carl.obfuscate(inp, ""))
 
 
     def testParseCmdline(self):
         argv = ["carl", "-o", "fancy", "-r", "-s"]
-        (options, args, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
-        self.assertEqual(args, ["carl"])
+        (options, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
         self.assertEqual(options.shortoutput, True)
         self.assertEqual(options.ostyle, "fancy")
         self.assertEqual(options.reverse, True)
+        self.assertEqual(fnames, [])
         self.assertEqual(msgs, [])
         self.assertEqual(errmsgs, [])
 
     def testParseCmdlineVerbose(self):
         argv = ["carl", "-o", "fancy", "-r"]
-        (options, args, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
-        self.assertEqual(args, ["carl"])
+        (options, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
         self.assertEqual(fnames, [])
         self.assertEqual(options.shortoutput, False)
         self.assertEqual(options.ostyle, "fancy")
@@ -100,9 +103,7 @@ class SessionsTest(unittest.TestCase):
 
     def testParseCmdlineVerboseWithArgs(self):
         argv = ["carl", "-o", "fancy", "-r", "foo", "bar", "baz"]
-        (options, args, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
-        self.assertGreater(len(args), 1)
-        self.assertEqual(args, ["carl", "foo", "bar", "baz"])
+        (options, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
         self.assertEqual(fnames, ["foo", "bar", "baz"])
         self.assertEqual(options.shortoutput, False)
         self.assertEqual(options.ostyle, "fancy")

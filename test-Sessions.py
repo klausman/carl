@@ -1,7 +1,12 @@
 #!/usr/bin/python -tt
-
+"""Test suite for Sessions.py from Carl"""
 import unittest
 import Sessions
+
+# Pylint has a counterproductive idea of proper names in this case. Also,
+# docstrings for tests seem a bit overblown. TODO: find someone who cares 
+# enough to write them.
+# pylint: disable=invalid-name,missing-docstring,too-many-public-methods
 
 class SessionsTest(unittest.TestCase):
     """Test Sessions class"""
