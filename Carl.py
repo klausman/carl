@@ -11,7 +11,6 @@ Intended to be used mainly by Gentoo Rsync Mirror admins
 import sys
 import time
 import hashlib # pylint: disable=import-error
-
 from optparse import OptionParser
 from random import random
 
@@ -130,7 +129,7 @@ def getfilecontent(fname):
     try:
         inputfile = open(fname)
         data += inputfile.read()
-    except IOerror as eobj: # pylint: disable=undefined-variable
+    except IOError as eobj:
         sys.stderr.write("Could not read '%s': %s\n" % (fname, eobj))
     return data
 
@@ -138,7 +137,7 @@ def getfilecontent(fname):
 def mkreport(options, stats):
     """Generate report from stats dictionary, heeding options."""
     output = []
-   
+        
     if not options.shortoutput:
         shorttt, pfxn = crunch(stats["totaltraffic"])
         output.append("Total traffic: %.2f %sBytes" % 
@@ -243,6 +242,8 @@ def parsedata(inputdata):
     stats["totaltraffic"] = 0
     stats["rtime"] = time.time()
     line = ""
+    ldate = None
+    ltime = None
 
     try:
         for line in inputdata.split("\n"):
@@ -288,15 +289,18 @@ def parsedata(inputdata):
                 stats["ipb"].incr(ipaddr, int(wbytes)+int(rbytes))
                 stats["totaltraffic"] += int(rbytes)+int(wbytes)
 
-        stats["span"] = (
-            (time.mktime(time.strptime("%s %s" % (ldate, ltime), 
-                                       "%Y/%m/%d %H:%M:%S")) -
-             stats["start"])/(24*3600))
+        if ldate is None or ltime is None:
+            stats["span"] = "unknown"
+        else:   
+            stats["span"] = (
+                (time.mktime(time.strptime("%s %s" % (ldate, ltime), 
+                                           "%Y/%m/%d %H:%M:%S")) -
+                 stats["start"])/(24*3600))
         stats["rtime"] = time.time()-stats["rtime"]
     except ValueError:
         sys.stderr.write("Your logfile has a very strange format.\n")
         sys.exit(2)
-
+    
     return stats
 
 

@@ -1,0 +1,4 @@
+2012/12/01 03:11:41 [105396] connect from examplehost.example.com (192.168.23.42)
+2012/12/01 03:11:41 [105396] rsync on gentoo-portage/ from examplehost.example.com (192.168.23.42)
+2012/12/01 03:11:42 [105396] building file list
+2012/12/01 03:12:01 [105396] sent 6284151 bytes  received 158664 bytes  total size 267597297

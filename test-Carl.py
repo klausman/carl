@@ -1,6 +1,9 @@
 #!/usr/bin/python -tt
 """Test suite for Carl.py from Carl"""
+import mock
 import unittest
+import Accounts
+import Sessions
 import Carl
 
 # Pylint has a counterproductive idea of proper names in this case. Also,
@@ -8,12 +11,22 @@ import Carl
 # enough to write them.
 # pylint: disable=invalid-name,missing-docstring,too-many-public-methods
 
-class SessionsTest(unittest.TestCase):
+class CarlHelpersTest(unittest.TestCase):
     """Test Sessions class"""
 
     def setUp(self):
         self.savedsalt = Carl.SALT
         Carl.SALT = "lemon curry"
+
+        class mocked_fileobj: 
+            # pylint: disable=too-few-public-methods
+            def __init__(self, readfunc=None):
+                if not readfunc:
+                    self.read = mock.MagicMock(return_value=
+                                               "contents shmontents")
+                else:
+                    self.read = readfunc
+        self.mocked_fileobj = mocked_fileobj
 
     def tearDown(self):
         Carl.SALT = self.savedsalt
@@ -112,4 +125,112 @@ class SessionsTest(unittest.TestCase):
         self.assertNotEqual(fnames, [])
         self.assertEqual(errmsgs, [])
 
+    def testGetfilecontent(self):
+        myobj = self.mocked_fileobj()
 
+        mocked_open = mock.MagicMock(return_value=myobj)
+
+        Carl.open = mocked_open
+        ret = Carl.getfilecontent("somefile")
+        mocked_open.assert_called_with("somefile")
+        myobj.read.assert_called_with()
+        self.assertEqual(ret, "contents shmontents")
+        del Carl.open
+    
+    def testGetfilecontentWithIOError(self):
+        mocked_sys_stderr = mock.MagicMock()
+        mocked_sys_stderr.write = mock.MagicMock()
+        myobj = self.mocked_fileobj()
+        mocked_open = mock.MagicMock(return_value=myobj, side_effect=IOError)
+        Carl.open = mocked_open
+        saved_stderr = Carl.sys.stderr
+        Carl.sys.stderr = mocked_sys_stderr
+
+        ret = Carl.getfilecontent("somefile")
+        mocked_open.assert_called_with("somefile")
+        self.assertTrue(Carl.sys.stderr.write.called)
+        self.assertEqual(ret, "")
+        del Carl.open
+        Carl.sys.stderr = saved_stderr
+
+class ReportTests(unittest.TestCase):
+    
+    def setUp(self):
+        gigabyte = 1024**3
+        self.stats = {}
+        self.stats["ip2hname"] =  {"127.0.0.1": "localhost.example.com",
+                     "192.168.65.3": "rfc1918-1.example.com",
+                     "172.19.22.4": "rfc1918-2.example.com",
+                     "10.4.2.65": "rfc1918-3.example.com",
+                     "2001::a:b:c:d": "ipv6-1.example.com",
+                     "2001:db8:a:b:c::": "ipv6-2.example.com"}
+        self.stats["linecount"] = 10**9
+        self.stats["rtime"] = 1
+        self.stats["span"] = 86400
+        self.stats["start"] = 0
+        self.stats["totaltraffic"] =  72*gigabyte
+        self.stats["ipb"] = Accounts.Accounts()
+        self.stats["ipc"] = Accounts.Accounts()
+        for ip in self.stats["ip2hname"].keys():
+            self.stats["ipb"].incr(ip, 1024*2**5)
+            self.stats["ipc"].incr(ip, 10)
+        self.stats["sessions"] = Sessions.Sessions()
+        self.stats["sessions"].seencount =  1000
+
+    def testMkReport(self):
+        argv = ["carl"]
+        options = Carl.parse_cmdline(argv)[0]
+        ret = Carl.mkreport(options, self.stats)
+        for (key, value) in self.stats["ip2hname"].items():
+            self.assertIn(key, ret)
+            self.assertIn(value, ret)
+
+        self.assertIn("Total traffic: 72.00 GBytes", ret)
+        self.assertIn("Total number of sessions: 1000", ret)
+        self.assertIn("Total number of unique IPs: %i"  % 
+                      len(self.stats["ip2hname"]), ret)
+        self.assertIn("Log seems to span 86400.00 days.", ret)
+        self.assertIn("account for 60 sessions", ret)
+        self.assertIn("1000000000 lines in 1.00 seconds, "
+                      "1000000000.00 lines per second", ret)
+
+    def testMkReportObfuscFancy(self):
+        argv = ["carl", "-o", "fancy"]
+        options = Carl.parse_cmdline(argv)[0]
+        ret = Carl.mkreport(options, self.stats)
+        for (key, value) in self.stats["ip2hname"].items():
+            self.assertNotIn(key, ret)
+            self.assertNotIn(value, ret)
+
+    def testMkReportObfuscSimple(self):
+        argv = ["carl", "-o", "simple"]
+        options = Carl.parse_cmdline(argv)[0]
+        ret = Carl.mkreport(options, self.stats)
+        for (key, value) in self.stats["ip2hname"].items():
+            self.assertNotIn(key, ret)
+            self.assertNotIn(value, ret)
+
+
+def testGarbage():
+    mocked_sys_exit = mock.MagicMock()
+    mocked_sys_stderr = mock.MagicMock()
+    mocked_sys_stderr.write = mock.MagicMock()
+    saved_sys_exit = Carl.sys.exit
+    saved_stderr = Carl.sys.stderr
+    Carl.sys.stderr = mocked_sys_stderr
+    Carl.sys.exit =  mocked_sys_exit
+    Carl.parsedata("I have no log and I must scream.")
+    mocked_sys_exit.assert_called_with(2)
+    Carl.sys.exit = saved_sys_exit
+    # We don't really care about _what_ was written. Or anything at all.
+    Carl.sys.stderr = saved_stderr
+
+def testNoLines():
+    Carl.parsedata("")
+
+def testGarbageMulti():
+    Carl.parsedata("Demogorgon")
+
+def testSession():
+    inp = open("testdata/test_snippet1.log").read()
+    Carl.parsedata(inp)
