@@ -7,23 +7,26 @@ import Sessions
 import Carl
 
 # Pylint has a counterproductive idea of proper names in this case. Also,
-# docstrings for tests seem a bit overblown. TODO: find someone who cares 
+# docstrings for tests seem a bit overblown. TODO: find someone who cares
 # enough to write them.
 # pylint: disable=invalid-name,missing-docstring,too-many-public-methods
 
+
 class CarlHelpersTest(unittest.TestCase):
+
     """Test Sessions class"""
 
     def setUp(self):
         self.savedsalt = Carl.SALT
         Carl.SALT = "lemon curry"
 
-        class mocked_fileobj: 
+        class mocked_fileobj:
             # pylint: disable=too-few-public-methods
+
             def __init__(self, readfunc=None):
                 if not readfunc:
-                    self.read = mock.MagicMock(return_value=
-                                               "contents shmontents")
+                    self.read = mock.MagicMock(
+                        return_value="contents shmontents")
                 else:
                     self.read = readfunc
         self.mocked_fileobj = mocked_fileobj
@@ -41,7 +44,7 @@ class CarlHelpersTest(unittest.TestCase):
                   (10240, (10, 1)),
                   (894352, (873.390625, 1)),
                   (3465298345823, (3.1516704855, 4)),
-                 ]
+                  ]
         for (inp, out) in golden:
             (res, mag) = Carl.crunch(inp)
             self.assertAlmostEqual(res, out[0])
@@ -56,7 +59,7 @@ class CarlHelpersTest(unittest.TestCase):
                   (10000, (10, 1)),
                   (894352, (894.352, 1)),
                   (3465298345823, (3.465298345823, 4)),
-                 ]
+                  ]
         for (inp, out) in golden:
             (res, mag) = Carl.crunch(inp, 1000)
             self.assertAlmostEqual(res, out[0])
@@ -67,7 +70,7 @@ class CarlHelpersTest(unittest.TestCase):
                   ("meenie", "9d9b3703...5ae754db"),
                   ("miney", "3751a98b...89aad47b"),
                   ("moe", "1b9fd716...9196f82f"),
-                 ]
+                  ]
         for (inp, out) in golden:
             self.assertEqual(out, Carl.obfuscate(inp, "fancy"))
 
@@ -79,7 +82,7 @@ class CarlHelpersTest(unittest.TestCase):
                   ("2001::a:b:c:d", "2001:..."),
                   ("2001:db8:a:b:c::", "2001:db8..."),
                   ("::1", "::1"),
-                 ]
+                  ]
         for (inp, out) in golden:
             self.assertEqual(out, Carl.obfuscate(inp, "simple"))
 
@@ -89,10 +92,9 @@ class CarlHelpersTest(unittest.TestCase):
                   "172.19.22.4",
                   "2001::a:b:c:d",
                   "2001:db8:a:b:c::",
-                 ]
+                  ]
         for inp in golden:
             self.assertEqual(inp, Carl.obfuscate(inp, ""))
-
 
     def testParseCmdline(self):
         argv = ["carl", "-o", "fancy", "-r", "-s"]
@@ -136,7 +138,7 @@ class CarlHelpersTest(unittest.TestCase):
         myobj.read.assert_called_with()
         self.assertEqual(ret, "contents shmontents")
         del Carl.open
-    
+
     def testGetfilecontentWithIOError(self):
         mocked_sys_stderr = mock.MagicMock()
         mocked_sys_stderr.write = mock.MagicMock()
@@ -153,29 +155,30 @@ class CarlHelpersTest(unittest.TestCase):
         del Carl.open
         Carl.sys.stderr = saved_stderr
 
+
 class ReportTests(unittest.TestCase):
-    
+
     def setUp(self):
-        gigabyte = 1024**3
+        gigabyte = 1024 ** 3
         self.stats = {}
-        self.stats["ip2hname"] =  {"127.0.0.1": "localhost.example.com",
-                     "192.168.65.3": "rfc1918-1.example.com",
-                     "172.19.22.4": "rfc1918-2.example.com",
-                     "10.4.2.65": "rfc1918-3.example.com",
-                     "2001::a:b:c:d": "ipv6-1.example.com",
-                     "2001:db8:a:b:c::": "ipv6-2.example.com"}
-        self.stats["linecount"] = 10**9
+        self.stats["ip2hname"] = {"127.0.0.1": "localhost.example.com",
+                                  "192.168.65.3": "rfc1918-1.example.com",
+                                  "172.19.22.4": "rfc1918-2.example.com",
+                                  "10.4.2.65": "rfc1918-3.example.com",
+                                  "2001::a:b:c:d": "ipv6-1.example.com",
+                                  "2001:db8:a:b:c::": "ipv6-2.example.com"}
+        self.stats["linecount"] = 10 ** 9
         self.stats["rtime"] = 1
         self.stats["span"] = 86400
         self.stats["start"] = 0
-        self.stats["totaltraffic"] =  72*gigabyte
+        self.stats["totaltraffic"] = 72 * gigabyte
         self.stats["ipb"] = Accounts.Accounts()
         self.stats["ipc"] = Accounts.Accounts()
         for ip in self.stats["ip2hname"].keys():
-            self.stats["ipb"].incr(ip, 1024*2**5)
+            self.stats["ipb"].incr(ip, 1024 * 2 ** 5)
             self.stats["ipc"].incr(ip, 10)
         self.stats["sessions"] = Sessions.Sessions()
-        self.stats["sessions"].seencount =  1000
+        self.stats["sessions"].seencount = 1000
 
     def testMkReport(self):
         argv = ["carl"]
@@ -187,7 +190,7 @@ class ReportTests(unittest.TestCase):
 
         self.assertIn("Total traffic: 72.00 GBytes", ret)
         self.assertIn("Total number of sessions: 1000", ret)
-        self.assertIn("Total number of unique IPs: %i"  % 
+        self.assertIn("Total number of unique IPs: %i" %
                       len(self.stats["ip2hname"]), ret)
         self.assertIn("Log seems to span 86400.00 days.", ret)
         self.assertIn("account for 60 sessions", ret)
@@ -218,18 +221,21 @@ def testGarbage():
     saved_sys_exit = Carl.sys.exit
     saved_stderr = Carl.sys.stderr
     Carl.sys.stderr = mocked_sys_stderr
-    Carl.sys.exit =  mocked_sys_exit
+    Carl.sys.exit = mocked_sys_exit
     Carl.parsedata("I have no log and I must scream.")
     mocked_sys_exit.assert_called_with(2)
     Carl.sys.exit = saved_sys_exit
     # We don't really care about _what_ was written. Or anything at all.
     Carl.sys.stderr = saved_stderr
 
+
 def testNoLines():
     Carl.parsedata("")
 
+
 def testGarbageMulti():
     Carl.parsedata("Demogorgon")
+
 
 def testSession():
     inp = open("testdata/test_snippet1.log").read()

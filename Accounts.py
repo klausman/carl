@@ -4,7 +4,9 @@ Simple Accounting module
 
 __revision__ = "2"
 
+
 class Accounts:
+
     """
     Simple Accounting class
     """
@@ -14,20 +16,20 @@ class Accounts:
         self.accounts = {}
         self.seencount = 0
 
-    def incr(self, k, num = 1):
+    def incr(self, k, num=1):
         """Increment 'k' by 'num'"""
         try:
-            self.accounts[k] = self.accounts[k]+num
+            self.accounts[k] = self.accounts[k] + num
         except KeyError:
-            self.accounts[k] = 0+num
+            self.accounts[k] = 0 + num
             self.seencount += 1
 
-    def decr(self, k, num = 1):
+    def decr(self, k, num=1):
         """Decrement 'k' by 'num'"""
         try:
-            self.accounts[k] = self.accounts[k]-num
+            self.accounts[k] = self.accounts[k] - num
         except KeyError:
-            self.accounts[k] = 0-num
+            self.accounts[k] = 0 - num
             self.seencount += 1
 
     def val(self, k):

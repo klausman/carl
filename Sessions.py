@@ -2,9 +2,11 @@
 
 __revision__ = "2"
 
+
 class Sessions:
+
     """Simple session tallying class"""
-    
+
     def __init__(self):
         """Setup book keeping"""
         self.accounts = {}
