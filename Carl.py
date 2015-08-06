@@ -34,15 +34,6 @@ __SIPREFIXES__ = ["", "k", "M", "G", "T", "P"]
 # unfeasible
 SALT = "%s" % (random())
 
-try:
-    # pylint: disable=import-error
-    import psyco
-    psyco.full()
-    __psyco_enabled__ = True
-except ImportError:
-    __psyco_enabled__ = False
-
-
 def crunch(number, div=1024):
     """
     Repeatedly divides a number by div until it is smaller than div
@@ -108,8 +99,6 @@ def parse_cmdline(argv):
     if not options.shortoutput:
         msgs.append("Carl (Carl Analyzes Rsync Logfiles) %s" % __version__)
         msgs.append("(C) Tobias Klausmann")
-        if __psyco_enabled__:
-            msgs.append("Psyco found and enabled.")
 
     if len(args) > 1:
         fnames = args[1:]
