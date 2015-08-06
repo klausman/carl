@@ -247,22 +247,23 @@ def parsedata(inputdata):
 
             elif msg.startswith("sent"):
                 try:
-                    values = msg.split(" ", 11)
+                    values = msg.split(None, 11)
                     wbytes = values[1].replace(",", "")
-                    rbytes = values[5].replace(",", "")
+                    rbytes = values[4].replace(",", "")
                 except ValueError:
                     continue
                 ipaddr = stats["sessions"].pop(pid)
                 stats["ipb"].incr(ipaddr, int(wbytes) + int(rbytes))
                 stats["totaltraffic"] += int(rbytes) + int(wbytes)
 
-        if ldate is None or ltime is None:
-            stats["span"] = "unknown"
-        else:
+        if ldate and ltime:
             stats["span"] = (
                 (time.mktime(time.strptime("%s %s" % (ldate, ltime),
                                            "%Y/%m/%d %H:%M:%S")) -
                  stats["start"]) / (24 * 3600))
+        else:
+            stats["span"] = "unknown"
+
         stats["rtime"] = time.time() - stats["rtime"]
     except ValueError:
         sys.stderr.write("Your logfile has a very strange format (line %i).\n" %
