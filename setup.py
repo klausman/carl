@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+"""Setup data for Carl"""
 from distutils.core import setup
 
 __version__ = "0.9"

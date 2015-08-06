@@ -34,6 +34,7 @@ __SIPREFIXES__ = ["", "k", "M", "G", "T", "P"]
 # unfeasible
 SALT = "%s" % (random())
 
+
 def crunch(number, div=1024):
     """
     Repeatedly divides a number by div until it is smaller than div
@@ -83,7 +84,7 @@ def parse_cmdline(argv):
     msgs = []
     errmsgs = []
     lic = "Licensed under the GPL v2 (see COPYING). No warranty whatsoever."
-    parser = argparse.ArgumentParser(prog="Carl %s\n%s"% (__version__, lic))
+    parser = argparse.ArgumentParser(prog="Carl %s\n%s" % (__version__, lic))
     parser.add_argument("-o", "--obfuscation", dest="ostyle", default="none",
                         help="obfuscation style (simple, fancy, none)")
     parser.add_argument("-r", "--reverse", action="store_true", dest="reverse",
@@ -266,7 +267,7 @@ def parsedata(inputdata):
     except ValueError:
         sys.stderr.write("Your logfile has a very strange format (line %i).\n" %
                          (stats["linecount"]))
-        sys.stderr.write("Line seen:\n"+line+"\n")
+        sys.stderr.write("Line seen:\n" + line + "\n")
         sys.exit(2)
 
     return stats
@@ -280,7 +281,7 @@ def main():
     (args, msgs, errmsgs) = parse_cmdline(sys.argv[1:])
 
     if args.version:
-        sys.stderr.write("Carl (Carl Analyzes Rsync Logfiles) v%s\n"%
+        sys.stderr.write("Carl (Carl Analyzes Rsync Logfiles) v%s\n" %
                          (__version__))
         sys.exit(0)
 
