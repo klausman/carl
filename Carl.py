@@ -8,10 +8,10 @@ An rsync logfile analyzer.
 
 Intended to be used mainly by Gentoo Rsync Mirror admins
 """
+import argparse
 import sys
 import time
 import hashlib  # pylint: disable=import-error
-from optparse import OptionParser
 from random import random
 
 import Accounts
@@ -82,55 +82,28 @@ def parse_cmdline(argv):
     """
     msgs = []
     errmsgs = []
-    usage = ("usage: %prog [options] [filename]\n\n"
-             "If filename is not specified, read from stdin")
     lic = "Licensed under the GPL v2 (see COPYING). No warranty whatsoever."
-    parser = OptionParser(usage=usage, version="%%prog %s\n%s" %
-                          (__version__, lic))
-    parser.add_option("-o", "--obfuscation", action="store", type="string",
-                      dest="ostyle", default="none",
-                      help="obfuscation style (simple, fancy, none) [%default]")
-    parser.add_option("-r", "--reverse", action="store_true",
-                      dest="reverse", help="set reverse (classic) display order")
-    parser.add_option("-s", "--short", action="store_true", default=False,
-                      dest="shortoutput", help="display only the two top-10 lists")
-    (options, args) = parser.parse_args(argv)
+    parser = argparse.ArgumentParser(prog="Carl %s\n%s"% (__version__, lic))
+    parser.add_argument("-o", "--obfuscation", dest="ostyle", default="none",
+                        help="obfuscation style (simple, fancy, none)")
+    parser.add_argument("-r", "--reverse", action="store_true", dest="reverse",
+                        help="set reverse (classic) display order")
+    parser.add_argument("-s", "--short", action="store_true", default=False,
+                        dest="shortoutput",
+                        help="display only the two top-10 lists")
+    parser.add_argument("-v", "--version", action="store_true", default=False)
+    parser.add_argument("filename", nargs="?", type=argparse.FileType('r'),
+                        default=sys.stdin)
+    args = parser.parse_args(argv)
 
-    if not options.shortoutput:
-        msgs.append("Carl (Carl Analyzes Rsync Logfiles) %s" % __version__)
-        msgs.append("(C) Tobias Klausmann")
-
-    if len(args) > 1:
-        fnames = args[1:]
-        msgs.append("Reading from %s" % ", ".join(fnames))
-    else:
-        fnames = []
-        if not options.shortoutput:
-            msgs.append("Reading from stdin")
-
-    return (options, fnames, msgs, errmsgs)
+    return (args, msgs, errmsgs)
 
 
-def getfilecontent(fname):
-    """
-    Open fname readonly, read its data and return it. If there is an IOError
-    when read()ing or open()ing, write an error message to stderr and return
-    nothing.
-    """
-    data = ""
-    try:
-        inputfile = open(fname)
-        data += inputfile.read()
-    except IOError as eobj:
-        sys.stderr.write("Could not read '%s': %s\n" % (fname, eobj))
-    return data
-
-
-def mkreport(options, stats):
-    """Generate report from stats dictionary, heeding options."""
+def mkreport(args, stats):
+    """Generate report from stats dictionary, heeding args."""
     output = []
 
-    if not options.shortoutput:
+    if not args.shortoutput:
         shorttt, pfxn = crunch(stats["totaltraffic"])
         output.append("Total traffic: %.2f %sBytes" %
                       (shorttt, __SIPREFIXES__[pfxn]))
@@ -148,7 +121,7 @@ def mkreport(options, stats):
     top10list = stats["ipb"].counts()[-10:]
     ranklist = list(range(1, 11))
 
-    if not options.reverse:
+    if not args.reverse:
         top10list.reverse()
         ranklist.reverse()
     for entry in top10list:
@@ -156,11 +129,11 @@ def mkreport(options, stats):
         output.append("%2s %12s (%9.2f%s) %15s %s" %
                       (ranklist.pop(), entry[0], sbytes,
                        __SIPREFIXES__[pfxn], obfuscate(
-                           entry[1], options.ostyle),
-                       obfuscate(stats["ip2hname"].get(entry[1], ""), options.ostyle)))
+                           entry[1], args.ostyle),
+                       obfuscate(stats["ip2hname"].get(entry[1], ""), args.ostyle)))
 
     output.append("-----------------------------------------")
-    if not options.shortoutput:
+    if not args.shortoutput:
         savg, pfxn = crunch(stats["totaltraffic"] / stats["span"])
         output.append("Average traffic per day: %0.2f bytes (%0.2f%sB)" %
                       (stats["totaltraffic"] / stats["span"], savg, __SIPREFIXES__[pfxn]))
@@ -186,20 +159,20 @@ def mkreport(options, stats):
     top10list = stats["ipc"].counts()[-10:]
     ranklist = list(range(1, 11))
 
-    if not options.reverse:
+    if not args.reverse:
         top10list.reverse()
         ranklist.reverse()
 
     for entry in top10list:
         output.append("%2s %6s    %6.2f   %15s %s" %
                       (ranklist.pop(), entry[0], entry[0] / stats["span"],
-                       obfuscate(entry[1], options.ostyle),
+                       obfuscate(entry[1], args.ostyle),
                        obfuscate(stats["ip2hname"].get(entry[1], ""),
-                                 options.ostyle)))
+                                 args.ostyle)))
 
     output.append("----------------------------------")
 
-    if not options.shortoutput:
+    if not args.shortoutput:
         output.append("Average number of sessions per day: %0.2f" %
                       (stats["sessions"].seencount / stats["span"]))
 
@@ -293,6 +266,7 @@ def parsedata(inputdata):
     except ValueError:
         sys.stderr.write("Your logfile has a very strange format (line %i).\n" %
                          (stats["linecount"]))
+        sys.stderr.write("Line seen:\n"+line+"\n")
         sys.exit(2)
 
     return stats
@@ -303,7 +277,17 @@ def main():
     Main program.
     """
 
-    (options, fnames, msgs, errmsgs) = parse_cmdline(sys.argv)
+    (args, msgs, errmsgs) = parse_cmdline(sys.argv[1:])
+
+    if args.version:
+        sys.stderr.write("Carl (Carl Analyzes Rsync Logfiles) v%s\n"%
+                         (__version__))
+        sys.exit(0)
+
+    if not args.shortoutput:
+        msgs.append("Carl (Carl Analyzes Rsync Logfiles) %s" % __version__)
+        msgs.append("(C) Tobias Klausmann")
+
     if msgs:
         print("\n".join(msgs))
     if errmsgs:
@@ -311,15 +295,10 @@ def main():
 
     sys.stdout.flush()
 
-    inputdata = ""
-
-    for fname in fnames:
-        inputdata += getfilecontent(fname)
-    if len(fnames) == 0:
-        inputdata = sys.stdin.read()
+    inputdata = args.filename.read()
 
     try:
-        print(mkreport(options, parsedata(inputdata)))
+        print(mkreport(args, parsedata(inputdata)))
 
     except KeyboardInterrupt:
         sys.stderr.write("Interrupted. Probably your fault.\n")

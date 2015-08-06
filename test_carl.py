@@ -97,63 +97,29 @@ class CarlHelpersTest(unittest.TestCase):
             self.assertEqual(inp, Carl.obfuscate(inp, ""))
 
     def testParseCmdline(self):
-        argv = ["carl", "-o", "fancy", "-r", "-s"]
-        (options, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
+        argv = ["-o", "fancy", "-r", "-s"]
+        (options, msgs, errmsgs) = Carl.parse_cmdline(argv)
         self.assertEqual(options.shortoutput, True)
         self.assertEqual(options.ostyle, "fancy")
         self.assertEqual(options.reverse, True)
-        self.assertEqual(fnames, [])
         self.assertEqual(msgs, [])
         self.assertEqual(errmsgs, [])
 
     def testParseCmdlineVerbose(self):
-        argv = ["carl", "-o", "fancy", "-r"]
-        (options, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
-        self.assertEqual(fnames, [])
+        argv = ["-o", "fancy", "-r"]
+        (options, _, errmsgs) = Carl.parse_cmdline(argv)
         self.assertEqual(options.shortoutput, False)
         self.assertEqual(options.ostyle, "fancy")
         self.assertEqual(options.reverse, True)
-        self.assertNotEqual(msgs, [])
         self.assertEqual(errmsgs, [])
 
-    def testParseCmdlineVerboseWithArgs(self):
-        argv = ["carl", "-o", "fancy", "-r", "foo", "bar", "baz"]
-        (options, fnames, msgs, errmsgs) = Carl.parse_cmdline(argv)
-        self.assertEqual(fnames, ["foo", "bar", "baz"])
+    def testParseCmdlineVerboseWithStdin(self):
+        argv = ["-o", "fancy", "-r"]
+        (options, _, errmsgs) = Carl.parse_cmdline(argv)
         self.assertEqual(options.shortoutput, False)
         self.assertEqual(options.ostyle, "fancy")
         self.assertEqual(options.reverse, True)
-        self.assertNotEqual(msgs, [])
-        self.assertNotEqual(fnames, [])
         self.assertEqual(errmsgs, [])
-
-    def testGetfilecontent(self):
-        myobj = self.mocked_fileobj()
-
-        mocked_open = mock.MagicMock(return_value=myobj)
-
-        Carl.open = mocked_open
-        ret = Carl.getfilecontent("somefile")
-        mocked_open.assert_called_with("somefile")
-        myobj.read.assert_called_with()
-        self.assertEqual(ret, "contents shmontents")
-        del Carl.open
-
-    def testGetfilecontentWithIOError(self):
-        mocked_sys_stderr = mock.MagicMock()
-        mocked_sys_stderr.write = mock.MagicMock()
-        myobj = self.mocked_fileobj()
-        mocked_open = mock.MagicMock(return_value=myobj, side_effect=IOError)
-        Carl.open = mocked_open
-        saved_stderr = Carl.sys.stderr
-        Carl.sys.stderr = mocked_sys_stderr
-
-        ret = Carl.getfilecontent("somefile")
-        mocked_open.assert_called_with("somefile")
-        self.assertTrue(Carl.sys.stderr.write.called)
-        self.assertEqual(ret, "")
-        del Carl.open
-        Carl.sys.stderr = saved_stderr
 
 
 class ReportTests(unittest.TestCase):
@@ -181,7 +147,7 @@ class ReportTests(unittest.TestCase):
         self.stats["sessions"].seencount = 1000
 
     def testMkReport(self):
-        argv = ["carl"]
+        argv = []
         options = Carl.parse_cmdline(argv)[0]
         ret = Carl.mkreport(options, self.stats)
         for (key, value) in self.stats["ip2hname"].items():
@@ -198,7 +164,7 @@ class ReportTests(unittest.TestCase):
                       "1000000000.00 lines per second", ret)
 
     def testMkReportObfuscFancy(self):
-        argv = ["carl", "-o", "fancy"]
+        argv = ["-o", "fancy"]
         options = Carl.parse_cmdline(argv)[0]
         ret = Carl.mkreport(options, self.stats)
         for (key, value) in self.stats["ip2hname"].items():
@@ -206,7 +172,7 @@ class ReportTests(unittest.TestCase):
             self.assertNotIn(value, ret)
 
     def testMkReportObfuscSimple(self):
-        argv = ["carl", "-o", "simple"]
+        argv = ["-o", "simple"]
         options = Carl.parse_cmdline(argv)[0]
         ret = Carl.mkreport(options, self.stats)
         for (key, value) in self.stats["ip2hname"].items():
