@@ -240,3 +240,7 @@ def testGarbageMulti():
 def testSession():
     inp = open("testdata/test_snippet1.log").read()
     Carl.parsedata(inp)
+
+def testNumbersWithCommas():
+    inp = open("testdata/test_commas_in_numbers.log").read()
+    Carl.parsedata(inp)
