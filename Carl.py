@@ -227,14 +227,14 @@ def parsedata(inputdata):
                 stats["start"] = time.mktime(
                     time.strptime("%s %s" % (ldate, ltime), "%Y/%m/%d %H:%M:%S"))
 
-            pid, msg = line[20:].split(" ", 1)
+            pid, msg = line[20:].split(None, 1)
             if msg.startswith("rsync error: "):
                 continue
             if (msg.startswith("rsync on %s" % (__MODULE__)) and
                     not msg.startswith("rsync on %s/metadata" % (__MODULE__)) and
                     not msg.startswith("rsync on %s//metadata" % (__MODULE__))):
                 try:
-                    hname, ipaddr = msg.split(" ", 6)[4:6]
+                    hname, ipaddr = msg.split(None, 6)[4:6]
                 except ValueError:
                     continue
                 ipaddr = ipaddr[1:-2]  # remove ()
