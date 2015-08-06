@@ -220,7 +220,7 @@ def mkreport(options, stats):
                       (stats["linecount"], stats["rtime"],
                        stats["linecount"] / stats["rtime"]))
 
-    return("\n".join(output))
+    return "\n".join(output)
 
 
 def parsedata(inputdata):

@@ -44,7 +44,7 @@ class CarlHelpersTest(unittest.TestCase):
                   (10240, (10, 1)),
                   (894352, (873.390625, 1)),
                   (3465298345823, (3.1516704855, 4)),
-                  ]
+                 ]
         for (inp, out) in golden:
             (res, mag) = Carl.crunch(inp)
             self.assertAlmostEqual(res, out[0])
@@ -59,7 +59,7 @@ class CarlHelpersTest(unittest.TestCase):
                   (10000, (10, 1)),
                   (894352, (894.352, 1)),
                   (3465298345823, (3.465298345823, 4)),
-                  ]
+                 ]
         for (inp, out) in golden:
             (res, mag) = Carl.crunch(inp, 1000)
             self.assertAlmostEqual(res, out[0])
@@ -70,7 +70,7 @@ class CarlHelpersTest(unittest.TestCase):
                   ("meenie", "9d9b3703...5ae754db"),
                   ("miney", "3751a98b...89aad47b"),
                   ("moe", "1b9fd716...9196f82f"),
-                  ]
+                 ]
         for (inp, out) in golden:
             self.assertEqual(out, Carl.obfuscate(inp, "fancy"))
 
@@ -82,7 +82,7 @@ class CarlHelpersTest(unittest.TestCase):
                   ("2001::a:b:c:d", "2001:..."),
                   ("2001:db8:a:b:c::", "2001:db8..."),
                   ("::1", "::1"),
-                  ]
+                 ]
         for (inp, out) in golden:
             self.assertEqual(out, Carl.obfuscate(inp, "simple"))
 
@@ -92,7 +92,7 @@ class CarlHelpersTest(unittest.TestCase):
                   "172.19.22.4",
                   "2001::a:b:c:d",
                   "2001:db8:a:b:c::",
-                  ]
+                 ]
         for inp in golden:
             self.assertEqual(inp, Carl.obfuscate(inp, ""))
 
