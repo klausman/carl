@@ -181,15 +181,12 @@ class ReportTests(unittest.TestCase):
 
 
 def testGarbage():
-    mocked_sys_exit = mock.MagicMock()
     mocked_sys_stderr = mock.MagicMock()
     mocked_sys_stderr.write = mock.MagicMock()
     saved_sys_exit = Carl.sys.exit
     saved_stderr = Carl.sys.stderr
     Carl.sys.stderr = mocked_sys_stderr
-    Carl.sys.exit = mocked_sys_exit
     Carl.parsedata("I have no log and I must scream.")
-    mocked_sys_exit.assert_called_with(2)
     Carl.sys.exit = saved_sys_exit
     # We don't really care about _what_ was written. Or anything at all.
     Carl.sys.stderr = saved_stderr

@@ -223,12 +223,20 @@ def parsedata(inputdata):
                 continue
 
             if stats["linecount"] == 1:
-                # timefmt: 2004/02/23 23:11:27
-                stats["start"] = time.mktime(
-                    time.strptime("%s %s" % (ldate, ltime), "%Y/%m/%d %H:%M:%S"))
+                try:
+                    # timefmt: 2004/02/23 23:11:27
+                    stats["start"] = time.mktime(
+                        time.strptime("%s %s" % (ldate, ltime), "%Y/%m/%d %H:%M:%S"))
+                except ValueError:
+                    linecount = 0  # Make sure we try the next one
+                    continue
 
-            pid, msg = line[20:].split(None, 1)
-            if msg.startswith("rsync error: "):
+            try:
+                pid, msg = line[20:].split(None, 1)
+            except ValueError:
+                continue
+            msg = msg.strip()
+            if not msg or msg.startswith("rsync error: "):
                 continue
             if (msg.startswith("rsync on %s" % (__MODULE__)) and
                     not msg.startswith("rsync on %s/metadata" % (__MODULE__)) and
@@ -256,20 +264,22 @@ def parsedata(inputdata):
                 stats["ipb"].incr(ipaddr, int(wbytes) + int(rbytes))
                 stats["totaltraffic"] += int(rbytes) + int(wbytes)
 
+        stats["span"] = "unknown"
         if ldate and ltime:
-            stats["span"] = (
-                (time.mktime(time.strptime("%s %s" % (ldate, ltime),
-                                           "%Y/%m/%d %H:%M:%S")) -
-                 stats["start"]) / (24 * 3600))
-        else:
-            stats["span"] = "unknown"
+            try:
+                stats["span"] = (
+                    (time.mktime(time.strptime("%s %s" % (ldate, ltime),
+                                               "%Y/%m/%d %H:%M:%S")) -
+                     stats["start"]) / (24 * 3600))
+            except ValueError:
+                pass
 
         stats["rtime"] = time.time() - stats["rtime"]
     except ValueError:
         sys.stderr.write("Your logfile has a very strange format (line %i).\n" %
                          (stats["linecount"]))
         sys.stderr.write("Line seen:\n" + line + "\n")
-        sys.exit(2)
+        raise
 
     return stats
 

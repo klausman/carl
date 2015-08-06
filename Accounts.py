@@ -45,9 +45,9 @@ class Accounts:
         """Return all keys"""
         return list(self.accounts.keys())
 
-    def counts(self, desc=None):
+    def counts(self, desc=False):
         '''Returns list of keys, sorted by values.
-        Feed a 1 if you want a descending sort.'''
+        If desc is True, return descending list, ascending otherwise.'''
         i = [(value, key) for key, value in list(self.accounts.items())]
         i.sort()
         if desc:
