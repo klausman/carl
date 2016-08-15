@@ -131,13 +131,15 @@ def mkreport(args, stats):
                       (ranklist.pop(), entry[0], sbytes,
                        __SIPREFIXES__[pfxn], obfuscate(
                            entry[1], args.ostyle),
-                       obfuscate(stats["ip2hname"].get(entry[1], ""), args.ostyle)))
+                       obfuscate(stats["ip2hname"].get(entry[1], ""),
+                                 args.ostyle)))
 
     output.append("-----------------------------------------")
     if not args.shortoutput:
         savg, pfxn = crunch(stats["totaltraffic"] / stats["span"])
         output.append("Average traffic per day: %0.2f bytes (%0.2f%sB)" %
-                      (stats["totaltraffic"] / stats["span"], savg, __SIPREFIXES__[pfxn]))
+                      (stats["totaltraffic"] / stats["span"], savg,
+                       __SIPREFIXES__[pfxn]))
 
         ttop5num = int(stats["ipb"].seencount * 0.05)
         ttop5traffic = 0
@@ -226,9 +228,10 @@ def parsedata(inputdata):
                 try:
                     # timefmt: 2004/02/23 23:11:27
                     stats["start"] = time.mktime(
-                        time.strptime("%s %s" % (ldate, ltime), "%Y/%m/%d %H:%M:%S"))
+                        time.strptime("%s %s" % (ldate, ltime),
+                                      "%Y/%m/%d %H:%M:%S"))
                 except ValueError:
-                    linecount = 0  # Make sure we try the next one
+                    stats["linecount"] = 0  # Make sure we try the next one
                     continue
 
             try:
@@ -239,8 +242,8 @@ def parsedata(inputdata):
             if not msg or msg.startswith("rsync error: "):
                 continue
             if (msg.startswith("rsync on %s" % (__MODULE__)) and
-                    not msg.startswith("rsync on %s/metadata" % (__MODULE__)) and
-                    not msg.startswith("rsync on %s//metadata" % (__MODULE__))):
+                    (" %s/metadata" % (__MODULE__) not in msg)):
+
                 try:
                     hname, ipaddr = msg.split(None, 6)[4:6]
                 except ValueError:
@@ -276,7 +279,7 @@ def parsedata(inputdata):
 
         stats["rtime"] = time.time() - stats["rtime"]
     except ValueError:
-        sys.stderr.write("Your logfile has a very strange format (line %i).\n" %
+        sys.stderr.write("Your logfile has a strange format (line %i).\n" %
                          (stats["linecount"]))
         sys.stderr.write("Line seen:\n" + line + "\n")
         raise

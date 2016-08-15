@@ -15,4 +15,4 @@ setup(name='carl',
       scripts=['Carl.py'],
       data_files=[
           ("share/doc/carl-%s/" % (__version__), ['COPYING', 'README'])]
-     )
+      )
