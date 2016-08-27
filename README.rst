@@ -1,5 +1,4 @@
-Carl - Carl Analyzes RSync Logfiles
------------------------------------
+# Carl - Carl Analyzes RSync Logfiles
 
 This is Carl. Carl analyzes rsync logfiles and creates a top ten
 list of users (or rather: IPs) both regarding volume and number of
